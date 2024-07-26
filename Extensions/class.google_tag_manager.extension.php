@@ -20,10 +20,13 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0617.1';
+		const VERSION	= '24.0726.1';
 
 		/**
 		 * @var string gtm/ga4 script url
+		 *
+		 * By loading the Google Tag Manager (GTM) or Google Analytics (GA4) script,
+		 * {eac}SimpleGTM causes data collected from your website *and from your users* to be transmitted to Google.
 		 */
 		const SCRIPT_URL = "https://www.googletagmanager.com/%s.js?id=%s";
 
@@ -142,9 +145,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 
 			if ($this->is_admin()) return;
 
-			//$this->transientId .= '_'.$this->getVisitorId();
 			// maybe load un-fired events
-			//$this->ga_events = $this->get_transient($this->transientId,[]);
 			$this->ga_events = $this->plugin->getVariable($this->transientId,[]);
 
 			$this->currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() :'USD';
@@ -178,10 +179,9 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			\add_action('shutdown', function()
 				{
 					if ($this->ga_events) {
-					//	$this->set_transient($this->transientId,$this->ga_events,15*MINUTE_IN_SECONDS);
 						$this->plugin->setVariable($this->transientId,$this->ga_events);
 					}
-				},-2 	// before session save
+				},-2 	// before session save (may be woocommerce session manager or other)
 			);
 		}
 
@@ -199,13 +199,14 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			if (!empty($tag_id) && preg_match("/\w{1,3}-\w{5,12}/",$tag_id))
 			{
 				$script = sprintf(self::SCRIPT_URL, $this->tag_type, $tag_id);
+				// GTM/GA must load in the document head but may load asynchronously
 				printf("<script async id='%s' type='text/javascript' src='%s'></script>\n",
 					'google-tag-manager', esc_url($script)
 				);
 			}
 
 			// set dataLayer & gtag function
-			$script  	= 	"window.dataLayer = window.dataLayer || [];\n".
+			$script_safe = 	"window.dataLayer = window.dataLayer || [];\n".
 							"function gtag(){dataLayer.push(arguments)};\n";
 
 			// get default consent
@@ -225,7 +226,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 
 			// add default consent
 			if (!empty($consent)) {
-				$script .=	"gtag('consent', 'default', ".wp_json_encode($consent).");\n";
+				$script_safe .=	"gtag('consent', 'default', ".wp_json_encode($consent).");\n";
 			}
 
 			// set runtime configuration
@@ -245,15 +246,15 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			if (!empty($tag_id))
 			{
 				if ($this->tag_type == 'gtm') {
-					$script .= 	"gtag('gtm.start', new Date().getTime());\n".
-								"gtag('event', 'gtm.js',".wp_json_encode($config).")\n";
+					$script_safe .= "gtag('gtm.start', new Date().getTime());\n".
+									"gtag('event', 'gtm.js',".wp_json_encode($config).")\n";
 				} else {
-					$script .=  "gtag('js', new Date());\n".
-  								"gtag('config', '".esc_attr($tag_id)."',".wp_json_encode($config).")\n";
+					$script_safe .= "gtag('js', new Date());\n".
+  									"gtag('config', '".esc_attr($tag_id)."',".wp_json_encode($config).")\n";
 				}
 			}
 
-			echo wp_get_inline_script_tag(trim($script),['id'=>'google-tag-manager-inline']);
+			echo wp_get_inline_script_tag(trim($script_safe),['id'=>'google-tag-manager-inline']);
 		}
 
 
@@ -279,7 +280,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 
 			if (empty($this->ga_events)) return;
 
-			$tags = "";
+			$tags_escaped = "";
 			foreach ($this->ga_events as $event => $events)
 			{
 				list ($type,$event) = explode('.',$event);
@@ -288,30 +289,29 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 					switch ($type) {
 						case 'ecommerce':
 							$values = ['event' => esc_attr($event), $type => $values];
-							$tags .= "dataLayer.push(".wp_json_encode($values).");\n";
+							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
 							break;
 						case 'gtm':
 							$values = array_merge(['event' => esc_attr($event)], $values);
-							$tags .= "dataLayer.push(".wp_json_encode($values).");\n";
+							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
 							break;
 						case 'gtag':
 						default:
-							$tags .= "gtag('event', '".esc_attr($event)."', ".wp_json_encode($values).");\n";
+							$tags_escaped .= "gtag('event', '".esc_attr($event)."', ".wp_json_encode($values).");\n";
 					}
 				}
 			}
 
 			// when to trigger - 'inline', 'DOMContentLoaded', 'load'
-			$when = $this->get_option('gtag_load_when','inline');
-			$script = ($when == 'inline')
+			$when = esc_attr($this->get_option('gtag_load_when','inline'));
+			$script_safe = ($when == 'inline')
 				? "%s"
 				: "addEventListener('{$when}',(e)=>{\n%s});";
-			$script = sprintf($script,$tags);
+			$script_safe = sprintf($script_safe,$tags_escaped);
 
-			echo wp_get_inline_script_tag(trim($script),['id'=>'google-tag-events-inline']);
+			echo wp_get_inline_script_tag(trim($script_safe),['id'=>'google-tag-events-inline']);
 
 			$this->ga_events = [];
-		//	$this->delete_transient($this->transientId);
 			$this->plugin->setVariable($this->transientId,null);
 		}
 

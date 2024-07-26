@@ -1,10 +1,10 @@
 === {eac}SimpleGTM Extension  ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.0.1
-Last Updated:       17-Jun-2024
+Stable tag:         1.0.2
+Last Updated:       26-Jul-2024
 Requires at least:  5.8
-Tested up to:       6.5
+Tested up to:       6.6
 Requires PHP:       7.4
 Requires EAC:       2.6
 Contributors:       kevinburkholder
@@ -122,6 +122,24 @@ See Recommended events:
     +   `$events` is an array of `[ $event => [$attributes] ]`
     +   `$event` is an array `[type,event_name]` where type is 'gtm', 'gtag', or 'ecommerce'.
 
+= 3rd Party Service =
+
+By loading the Google Tag Manager (GTM) or Google Analytics (GA4) script, {eac}SimpleGTM causes data collected from your website *and from your users* to be transmitted to Google. 
+
++   [How Google Analytics works](https://support.google.com/analytics/answer/12159447?hl=en)
++   [Introduction to Google Tag Manager](https://support.google.com/tagmanager/answer/6102821?hl=en)
+
+*You are responsible for the proper configuration of your Google Analytics property and/or Google Tag Manager settings as well as proper notification and consent from your users.*
+
++   [Introduction to user consent](https://support.google.com/analytics/answer/12329599)
+
+= Privacy Disclosures Policy =
+
+When you use Google Analytics on your site or application, you must disclose the use of Google Analytics and how it collects and processes data.
+
++   [Google's Privacy & Terms](https://www.google.com/policies/privacy/partners/)
++   [Safeguarding your data](https://support.google.com/analytics/answer/6004245)
+
 
 == Installation ==
 
@@ -182,6 +200,12 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.0.2 – July 26, 2024 =
+
++   Additional documentation re: 3rd Party & Privacy.
++   Compatible with WordPress 6.6.
++   Safe/escaped variable naming convention.
 
 = Version 1.0.1 – June 17, 2024 =
 
