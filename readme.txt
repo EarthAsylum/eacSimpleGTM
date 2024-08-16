@@ -145,8 +145,6 @@ When you use Google Analytics on your site or application, you must disclose the
 
 **{eac}SimpleGTM** is an extension plugin to and requires installation and registration of [{eac}Doojigger](https://eacDoojigger.earthasylum.com/).
 
-_\* Currently pending approval from the WordPress Plugin Repository._
-
 = Automatic Plugin Installation =
 
 This plugin is available from the [WordPress Plugin Repository](https://wordpress.org/plugins/search/earthasylum/) and can be installed from the WordPress Dashboard » *Plugins* » *Add New* page. Search for 'EarthAsylum', click the plugin's [Install] button and, once installed, click [Activate].
