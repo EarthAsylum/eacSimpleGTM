@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0726.1';
+		const VERSION	= '24.0817.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -232,15 +232,16 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			// set runtime configuration
 			$config = [
 				'send_page_view' 		=> !in_array('page-view',$this->event_options),
-				'url_passthrough'		=> $this->is_option('gtag_options','url_passthrough') ? true : false,
-				'allow_google_signals' 	=> $this->is_option('gtag_options','allow_google_signals') ? true : false,
-				'ads_data_redaction' 	=> $this->is_option('gtag_options','ads_data_redaction') ? true : false,
+				'url_passthrough'		=> $this->is_option('gtag_options','url_passthrough') ? true : null,
+				'allow_google_signals' 	=> $this->is_option('gtag_options','allow_google_signals') ? true : null,
+				'ads_data_redaction' 	=> $this->is_option('gtag_options','ads_data_redaction') ? true : null,
 			];
 			/**
 			 * filter {pluginname}_google_tag_configuration - allow actors to filter configuration
 			 * @param array configuration array
 			 */
 			$config 	= $this->apply_filters('google_tag_configuration',$config);
+			$config 	= array_filter($config, function($v) {return !is_null($v);});
 
 			// configure/initialize
 			if (!empty($tag_id))
@@ -267,6 +268,9 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
     		// ajax and pre-fetch pages may not process script tags
 			if ($this->varServer("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 			or  $this->varServer("HTTP_PURPOSE") == 'prefetch') return;
+
+			// wp consent api says no marketing consent
+			if (function_exists('wp_has_consent') && ! wp_has_consent('statistics-anonymous')) return;
 
 			if (!empty($this->event_options))
 			{

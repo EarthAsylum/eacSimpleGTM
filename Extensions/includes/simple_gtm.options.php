@@ -6,7 +6,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0617.1
+ * @version		24.0816.1
  *
  * included for admin_options_settings() method
  */
@@ -84,8 +84,8 @@ $this->registerExtensionOptions( $this->className,
 				'label'			=> 	'Send Event Tags',
 				'options'		=> 	[
 					'In Page Footer'	=> 'inline',
-					'On Document Load'	=> 'DOMContentLoaded',	// eveent name
-					'On Window Ready'	=> 'load',				// eveent name
+					'On Document Load'	=> 'DOMContentLoaded',	// event name
+					'On Window Ready'	=> 'load',				// event name
 				],
 				'default'		=> 	'inline',
 				'info'			=> 	'When to send events to the browser; in-line, when the document has loaded or when the window is rendered.',

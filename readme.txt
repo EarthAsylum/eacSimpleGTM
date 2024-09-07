@@ -1,8 +1,8 @@
-=== {eac}SimpleGTM Extension  ===
+=== {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.0.2
-Last Updated:       26-Jul-2024
+Stable tag:         1.0.3
+Last Updated:       17-Aug-2024
 Requires at least:  5.8
 Tested up to:       6.6
 Requires PHP:       7.4
@@ -101,6 +101,8 @@ See Recommended events:
 >   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in 
 [Google Tag Manager](https://tagmanager.google.com/).
 
+>   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events when 'marketing' consent is denied.
+
 = Actions and Filters =
 
 +   eacDoojigger_google_tag_event 	- Action to add a custom event.
@@ -198,6 +200,13 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.0.3 – August 17, 2024 =
+
++   Support WP Consent API.
++   Only send boolean gtag options, checked = true, default is null.
+    +   url_passthrough, allow_google_signals, ads_data_redaction.
+    +   External actors may set to false via filter.
 
 = Version 1.0.2 – July 26, 2024 =
 

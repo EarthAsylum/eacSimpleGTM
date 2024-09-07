@@ -1,4 +1,4 @@
-## {eac}SimpleGTM Extension   
+## {eac}Doojigger Simple GTM Extension for WordPress  
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
 [![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
@@ -7,8 +7,8 @@
 
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:         1.0.2  
-Last Updated:       26-Jul-2024  
+Stable tag:         1.0.3  
+Last Updated:       17-Aug-2024  
 Requires at least:  5.8  
 Tested up to:       6.6  
 Requires PHP:       7.4  
@@ -108,6 +108,8 @@ See Recommended events:
 
 >   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in 
 [Google Tag Manager](https://tagmanager.google.com/).
+
+>   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events when 'marketing' consent is denied.
 
 #### Actions and Filters
 
