@@ -7,8 +7,8 @@
 
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:         1.0.3  
-Last Updated:       17-Aug-2024  
+Stable tag:         1.0.4  
+Last Updated:       11-Sep-2024  
 Requires at least:  5.8  
 Tested up to:       6.6  
 Requires PHP:       7.4  
@@ -101,6 +101,9 @@ See Recommended events:
     +   `update_cart_item {currency, value, items}`
     +   *items = {item_id, item_name, price, discount, quantity, item_variant, item_category}*
 
++   Enhanced Conversions
+    + [Enhanced Conversions for web](https://support.google.com/google-ads/answer/13258081) is a feature that can improve the accuracy of your conversion measurement. It supplements your existing conversion tags by sending hashed first-party conversion data from your website in a privacy safe way.
+
 +   Page Not Found
     +   `page_not_found {request_uri}`
 
@@ -109,12 +112,15 @@ See Recommended events:
 >   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in 
 [Google Tag Manager](https://tagmanager.google.com/).
 
->   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events when 'marketing' consent is denied.
+>   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events (when 'statistics-anonymous' consent is denied) and Enhanced Conversions (when 'statistics' consent is denied).
 
 #### Actions and Filters
 
 +   eacDoojigger_google_tag_event 	- Action to add a custom event.
     +   `do_action( 'eacDoojigger_google_tag_event( 'event_name', [...event parameters...] ) );`
+
++   eacDoojigger_google_tag_data    - Action to add data to the Google tag data layer.
+    +   `do_action( 'eacDoojigger_google_tag_data( 'data_name', [...data array...] ) );`
 
 +   eacDoojigger_google_ecommerce_event - Action to add an ecommerce event.
     +   `do_action( 'eacDoojigger_google_ecommerce_event( 'event_name', [...event parameters...] ) );`
@@ -125,12 +131,12 @@ See Recommended events:
 
 +   eacDoojigger_google_tag_configuration - Filter the configuration array.
     +   `add_filter( 'eacDoojigger_google_tag_configuration', function($config) {...} );`
-    +   `$config` is an array of `[ $option => bool ]`
+    +   `$config` is an array of `[ $option => bool|null ]`
 
 +   eacDoojigger_google_tag_events 	- Filter the events array prior to output.
     +   `add_filter( 'eacDoojigger_google_tag_events', function($events) {...} );`
     +   `$events` is an array of `[ $event => [$attributes] ]`
-    +   `$event` is an array `[type,event_name]` where type is 'gtm', 'gtag', or 'ecommerce'.
+    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', or 'ecommerce'.
 
 #### 3rd Party Service
 

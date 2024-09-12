@@ -6,7 +6,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0816.1
+ * @version		24.0909.1
  *
  * included for admin_options_settings() method
  */
@@ -20,8 +20,9 @@ $events = [
 	'View Archive (archives, authors, dates)'	=> 'view-archive',
 ];
 if ( $this->use_ecommerce ) {
-	$events['E-Commerce (items, cart, checkout, purchase)'] = 'ecommerce';
-	$events['Cart Actions (add, remove, update, coupon)'] 	= 'cart-actions';
+	$events['E-Commerce Pages (product, cart, checkout, purchase)'] = 'ecommerce';
+	$events['Cart Actions (add, remove, update, coupon)'] 			= 'cart-actions';
+	$events['Enhanced Conversions (customer data)'] 				= 'enhanced-conv';
 }
 $events['Page Not Found (404) Errors'] = 'track-404';
 
@@ -106,8 +107,10 @@ $this->registerExtensionOptions( $this->className,
 									"View Content includes categories, terms, and tags. ".
 									"View Archive includes archives, authors, and dates. ".
 									(($this->use_ecommerce)
-										? "E-Commerce includes items, cart, checkout and purchase. ".
-											"Cart Actions include add, remove, update and coupon"
+										? "E-Commerce Pages include product, cart, checkout, and purchase. ".
+											"Cart Actions include add, remove, update and coupon. ".
+											"<a href='https://support.google.com/google-ads/answer/13258081' target='_blank'>Enhanced Conversions</a> ".
+											"supplements your conversion tag by sending hashed customer data to Google."
 										: ""
 									),
 				'style'			=> 	'display:block;',

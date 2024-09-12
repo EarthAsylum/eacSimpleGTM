@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0817.1';
+		const VERSION	= '24.0909.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -106,6 +106,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 				 * @param bool allow multiple
 				 */
 				$this->add_action('google_tag_event', 		array($this,'add_google_event'),10,3);
+				$this->add_action('google_tag_data', 		array($this,'add_google_data'),10,2);
 				$this->add_action('google_ecommerce_event', array($this,'add_ecommerce_event'),10,3);
 			}
 
@@ -151,18 +152,15 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			$this->currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() :'USD';
 			$this->decimals = function_exists('wc_get_price_decimals') ? wc_get_price_decimals() : 2;
 
-			$this->event_options = $this->get_option('gtag_events',[]);
+			$this->event_options = (array)$this->get_option('gtag_events',[]);
 
 			\add_action('wp_print_scripts', 				array($this,'output_tag_manager')); // do this early
 			\add_action('wp_print_footer_scripts', 			array($this,'output_tag_events'));	// do this later
 
 			/* E-Commerce */
-			if (in_array('ecommerce',$this->event_options) || in_array('cart-actions',$this->event_options))
-			{
-				if ($this->use_ecommerce == 'woocommerce') {
-					require 'includes/woocommerce_tag_manager.class.php';
-					new woocommerce_tag_manager($this,$this->event_options);
-				}
+			if ($this->use_ecommerce == 'woocommerce') {
+				require 'includes/woocommerce_tag_manager.class.php';
+				new woocommerce_tag_manager($this,$this->event_options);
 			}
 
 			/* track 404 */
@@ -291,6 +289,14 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 				foreach ($events as $values)
 				{
 					switch ($type) {
+						case 'set':
+							$tags_escaped .= "gtag('set', '".esc_attr($event)."', ".wp_json_encode($values).");\n";
+							break;
+						case 'data':	// user_data -> userData
+							$event = lcfirst(str_replace(['_','-'],'',ucwords($event,'_-')));
+							$values = [esc_attr($event) => $values];
+							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
+							break;
 						case 'ecommerce':
 							$values = ['event' => esc_attr($event), $type => $values];
 							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
@@ -314,6 +320,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			$script_safe = sprintf($script_safe,$tags_escaped);
 
 			echo wp_get_inline_script_tag(trim($script_safe),['id'=>'google-tag-events-inline']);
+			$this->plugin->logDebug($script_safe,__METHOD__);
 
 			$this->ga_events = [];
 			$this->plugin->setVariable($this->transientId,null);
@@ -345,6 +352,19 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
     	{
     		$type = ($this->tag_type == 'gtm') ? 'ecommerce' : $this->tag_type;
 			$this->_push_event_array([$type,$event], $params, $allowMultiple);
+		}
+
+
+		/**
+		 * Set named GA data
+		 *
+		 * @param string $name data name
+		 * @param array $params event attributes
+		 */
+    	public function add_google_data(string $name, array $params = []): void
+    	{
+    		$type = ($this->tag_type == 'gtm') ? 'data' : 'set';
+			$this->_push_event_array([$type,$name], $params, false);
 		}
 
 
@@ -393,7 +413,9 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			}
 
 			/* E-Commerce */
-			if ( in_array('ecommerce',$this->event_options) || in_array('cart-actions',$this->event_options) )
+			if ( in_array('ecommerce',$this->event_options)
+			||   in_array('enhanced-conv',$this->event_options)
+			||   in_array('cart-actions',$this->event_options) )
 			{
 				/**
 				 * filter {pluginname}__add_ecommerce_event
@@ -464,7 +486,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			$location	= ($this->varServer("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest")
 							? $this->varServer('HTTP_REFERER')
 							: $this->plugin->currentURL();
-			$referer 	= $this->varServer('HTTP_REFERER');
+			$referer 	= $this->varServer('HTTP_REFERER') ?: '';
 			return [
 				'page_title'	=> html_entity_decode($title),
 				'page_location'	=> explode('?',$location)[0],
