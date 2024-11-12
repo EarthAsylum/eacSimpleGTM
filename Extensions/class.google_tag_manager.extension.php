@@ -10,9 +10,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
-	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
 
 	class google_tag_manager extends \EarthAsylumConsulting\abstract_extension
@@ -20,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0909.1';
+		const VERSION	= '24.1111.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -196,11 +194,15 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			// if we have a complete id, load the script
 			if (!empty($tag_id) && preg_match("/\w{1,3}-\w{5,12}/",$tag_id))
 			{
-				$script = sprintf(self::SCRIPT_URL, $this->tag_type, $tag_id);
 				// GTM/GA must load in the document head but may load asynchronously
-				printf("<script async id='%s' type='text/javascript' src='%s'></script>\n",
-					'google-tag-manager', esc_url($script)
-				);
+				// register/enqueue force load in footer
+				$handle = 'google-tag-manager';
+				$src 	= sprintf(self::SCRIPT_URL, $this->tag_type, $tag_id);
+				$src 	= apply_filters( 'script_loader_src', $src, $handle );
+				$tag 	= sprintf("<script async id='%s' type='text/javascript' src='%s'></script>\n",
+							$handle, esc_url($src)
+						);
+				echo apply_filters( 'script_loader_tag', $tag, $handle, $src );
 			}
 
 			// set dataLayer & gtag function
@@ -267,7 +269,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			if ($this->varServer("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 			or  $this->varServer("HTTP_PURPOSE") == 'prefetch') return;
 
-			// wp consent api says no marketing consent
+			// wp consent api says no consent
 			if (function_exists('wp_has_consent') && ! wp_has_consent('statistics-anonymous')) return;
 
 			if (!empty($this->event_options))

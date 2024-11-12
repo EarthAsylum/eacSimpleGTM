@@ -1,10 +1,10 @@
 === {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.0.4
-Last Updated:       11-Sep-2024
+Stable tag:         1.0.5
+Last Updated:       11-Nov-2024
 Requires at least:  5.8
-Tested up to:       6.6
+Tested up to:       6.7
 Requires PHP:       7.4
 Requires EAC:       2.6
 Contributors:       kevinburkholder
@@ -206,6 +206,11 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.0.5 – November 11, 2024 =
+
++   Apply `script_loader_src` and `script_loader_tag` filters when loading google script.
++   Compatible with WordPress 6.7.
 
 = Version 1.0.4 – September 11, 2024 =
 

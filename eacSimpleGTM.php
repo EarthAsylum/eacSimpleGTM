@@ -12,9 +12,9 @@ namespace EarthAsylumConsulting;
  * @wordpress-plugin
  * Plugin Name:			{eac}SimpleGTM
  * Description:			{eac}SimpleGTM Adds Google Tag Manager (gtm) or Google Analytics (gtag) to WordPress
- * Version:				1.0.4
+ * Version:				1.0.5
  * Requires at least:	5.8
- * Tested up to:		6.6
+ * Tested up to:		6.7
  * Requires PHP:		7.4
  * Plugin URI:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
  * Author:				EarthAsylum Consulting
@@ -23,7 +23,7 @@ namespace EarthAsylumConsulting;
  * License URI:			https://www.gnu.org/licenses/gpl.html
  */
 
-if (!defined('EAC_DOOJIGGER_VERSION'))
+if (!defined('EACDOOJIGGER_VERSION'))
 {
 	\add_action( 'all_admin_notices', function()
 		{
