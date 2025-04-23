@@ -1,12 +1,12 @@
 === {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.0.5
-Last Updated:       11-Nov-2024
+Stable tag:         1.0.6
+Last Updated:       19-Apr-2025
 Requires at least:  5.8
-Tested up to:       6.7
+Tested up to:       6.8
 Requires PHP:       7.4
-Requires EAC:       2.6
+Requires EAC:       3.0
 Contributors:       kevinburkholder
 License:            GPLv3 or later
 License URI:        https://www.gnu.org/licenses/gpl.html
@@ -196,7 +196,7 @@ Once installed and activated options for this extension will show in the 'Tracki
 
 == Copyright ==
 
-= Copyright © 2024, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
+= Copyright © 2025, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -206,6 +206,13 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.0.6 – Apr 19, 2025 =
+
++   Compatible with WordPress 6.8.
++   Prevent `_load_textdomain_just_in_time was called incorrectly` notice from WordPress.
+    +   All extensions - via eacDoojigger 3.1.
+    +   Modified extension registration in constructor.
 
 = Version 1.0.5 – November 11, 2024 =
 

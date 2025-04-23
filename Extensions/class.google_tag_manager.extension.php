@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 */
 
@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1111.1';
+		const VERSION	= '25.0417.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -86,9 +86,10 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		{
 			parent::__construct($plugin, self::DEFAULT_DISABLED);
 
+			$this->registerExtension( [$this->className,'tracking'] );
+
 			if ($this->is_admin())
 			{
-				$this->registerExtension( [$this->className,'tracking'] );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
