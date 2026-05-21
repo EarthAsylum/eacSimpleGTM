@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0909.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0417.1
  */
 
 class woocommerce_tag_manager
@@ -81,14 +81,15 @@ class woocommerce_tag_manager
 			$coupons = (array)$order->get_coupon_codes();
 			$discount = $order->get_total_discount();
 			$this->gtm->add_ecommerce_event('purchase',[
-				'transaction_id'=> $order->get_id(),
+				'transaction_id'=> $order->get_order_number(),
 				'currency'		=> $currency,
 				'value'			=> $value,
 				'coupon'		=> implode('/',$coupons),
 				'discount'		=> round($discount,$decimals),
 				'shipping'		=> round($order->get_shipping_total(),$decimals),
 				'tax'			=> round($order->get_total_tax(),$decimals),
-				'items'			=> $items
+				'items'			=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			]);
 			return true;
 		}
@@ -106,11 +107,12 @@ class woocommerce_tag_manager
 			$coupons = (array)$wcCart->get_applied_coupons();
 			$discount = $wcCart->get_cart_discount_total();
 			$this->gtm->add_ecommerce_event('begin_checkout',[
-					'currency'		=> $currency,
-					'value'			=> $value,
-					'coupon'		=> implode('/',$coupons),
-					'discount'		=> round($discount,$decimals),
-					'items'			=> $items
+				'currency'		=> $currency,
+				'value'			=> $value,
+				'coupon'		=> implode('/',$coupons),
+				'discount'		=> round($discount,$decimals),
+				'items'			=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			]);
 			return true;
 		}
@@ -126,7 +128,10 @@ class woocommerce_tag_manager
 				$items[] = $this->get_item($product,$item['quantity']);
 			}
 			$this->gtm->add_ecommerce_event('view_cart',[
-				'currency'=>$currency,'value'=>$value,'items'=>$items
+				'currency'		=> $currency,
+				'value'			=> $value,
+				'items'			=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			]);
 			return true;
 		}
@@ -138,7 +143,10 @@ class woocommerce_tag_manager
 				$item 	= $this->get_item($id);
 				$value 	= round($item['price'],$decimals);
 				$this->gtm->add_ecommerce_event('view_item',[
-					'currency'=>$currency,'value'=>$value,'items'=>[$item]
+					'currency'	=> $currency,
+					'value'		=> $value,
+					'items'		=> [$item],
+					'categories'=> $this->get_all_categories([$item]),
 				]);
 			}
 			return true;
@@ -263,10 +271,12 @@ class woocommerce_tag_manager
 		{
 			$item 		= $product->get_slug();
 			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$items		= [ $this->get_item($id,$quantity) ];
 			$this->gtm->add_ecommerce_event('add_to_cart',array_merge([
-				'currency'	=> $this->gtm->currency,
-				'value'		=> $value,
-				'items' 	=> [ $this->get_item($id,$quantity) ]
+				'currency'		=> $this->gtm->currency,
+				'value'			=> $value,
+				'items' 		=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			],$this->gtm->page_attributes()),true);
 		}
 	}
@@ -286,10 +296,12 @@ class woocommerce_tag_manager
 			$item 		= $product->get_slug();
 			$quantity 	= $wcCart->cart_contents[ $cart_item_key ][ 'quantity' ];
 			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$items		= [ $this->get_item($product,$quantity) ];
 			$this->gtm->add_ecommerce_event('remove_from_cart',array_merge([
-				'currency'	=> $this->gtm->currency,
-				'value'		=> $value,
-				'items' 	=> [ $this->get_item($product,$quantity) ]
+				'currency'		=> $this->gtm->currency,
+				'value'			=> $value,
+				'items' 		=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			],$this->gtm->page_attributes()),true);
 		}
 	}
@@ -308,10 +320,12 @@ class woocommerce_tag_manager
 		{
 			$item 		= $product->get_slug();
 			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$items		= [ $this->get_item($product,$quantity) ];
 			$this->gtm->add_ecommerce_event('update_cart_item',array_merge([
 				'currency'	=> $this->gtm->currency,
 				'value'		=> $value,
-				'items' 	=> [ $this->get_item($product,$quantity) ]
+				'items' 		=> $items,
+				'categories'	=> $this->get_all_categories($items),
 			],$this->gtm->page_attributes()),true);
 		}
 	}
@@ -385,15 +399,50 @@ class woocommerce_tag_manager
 			}
 			if ($terms = get_the_terms( $product->get_id(), 'product_cat' ))
 			{
+				$categories = [];
 				foreach ($terms as $x => $term) {
 					if ($x < 5) {
 						$value[rtrim('item_category'.$x+1,'1')] = $term->name;
+						$categories[] = strtolower($term->name);
 					}
 				}
+				$value['item_categories'] = array_unique($categories);
 			}
 			return $value;
 		}
 		return [];
+	}
+
+
+	/**
+	 * Get unique categories from all items
+	 *
+	 * @param array $items from get_item()
+	 *
+	 * @return array
+	 */
+	private function get_all_categories($items)
+	{
+		$categories = [];
+		foreach ($items as $item) {
+			$categories = array_merge($categories,$item['item_categories']);
+		}
+		return array_unique($categories);
+	}
+
+
+	/**
+	 * get woocommerce order attribution (incomplete)
+	 *
+	 * @return 	array	attribution values
+	 */
+	private function woo_attribution()
+	{
+		$allow_tracking = apply_filters( 'wc_order_attribution_allow_tracking', true );
+		if (!$allow_tracking) return [];
+		$attribution = [];
+		// get woocommmerce order attribution array...
+		return $attribution;
 	}
 
 

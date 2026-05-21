@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 */
 
@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0417.1';
+		const VERSION	= '26.0421.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -189,6 +189,10 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 */
     	public function output_tag_manager(): void
     	{
+    		// incase `wp_print_scripts` is fired more than once
+    		static $once = 0;
+    		if ($once++) return;
+
 			$tag_id 	= $this->get_option('gtag_container_id');
 			$this->tag_type = (!empty($tag_id) && substr($tag_id,0,3) == 'GTM') ? 'gtm' : 'gtag';
 
@@ -257,6 +261,8 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			}
 
 			echo wp_get_inline_script_tag(trim($script_safe),['id'=>'google-tag-manager-inline']);
+
+			$this->do_action('google_tag_container',$this->tag_type,$config);
 		}
 
 
@@ -266,6 +272,10 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 */
     	public function output_tag_events(): void
     	{
+    		// incase `wp_print_footer_scripts` is fired more than once
+    		static $once = 0;
+    		if ($once++) return;
+
     		// ajax and pre-fetch pages may not process script tags
 			if ($this->varServer("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 			or  $this->varServer("HTTP_PURPOSE") == 'prefetch') return;
@@ -381,6 +391,8 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 */
     	private function _push_event_array(array $event, array $params = [], $allowMultiple = false): void
     	{
+			$params = $this->apply_filters('google_tag_array',$params,$event);
+
     		$event = implode('.',$event);
 
 			if ($allowMultiple) {

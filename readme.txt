@@ -1,11 +1,11 @@
 === {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.0.6
-Last Updated:       19-Apr-2025
+Stable tag:         1.0.7
+Last Updated:       21-May-2026
 Requires at least:  5.8
-Tested up to:       6.8
-Requires PHP:       7.4
+Tested up to:       7.0
+Requires PHP:       8.1
 Requires EAC:       3.0
 Contributors:       kevinburkholder
 Donate link:        https://github.com/sponsors/EarthAsylum
@@ -31,13 +31,13 @@ If no consent attributes are selected than the "consent default" configuration i
 
 Default consent settings passed when initializing GTM or GA4:
 
-    ad_storage	
-    analytics_storage	
-    ad_user_data	
-    ad_personalization	
-    functionality_storage	
-    personalization_storage	
-    security_storage	
+    ad_storage
+    analytics_storage
+    ad_user_data
+    ad_personalization
+    functionality_storage
+    personalization_storage
+    security_storage
 
 = Consent Options (advanced) =
 
@@ -102,7 +102,7 @@ See Recommended events:
 
 >   \* Session storage is used when cart actions are triggered. This requires enabling/setting *{eac}Doojigger → Session Extension*.
 
->   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in 
+>   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in
 [Google Tag Manager](https://tagmanager.google.com/).
 
 >   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events (when 'statistics-anonymous' consent is denied) and Enhanced Conversions (when 'statistics' consent is denied).
@@ -131,9 +131,19 @@ See Recommended events:
     +   `$events` is an array of `[ $event => [$attributes] ]`
     +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', or 'ecommerce'.
 
++   eacDoojigger_google_tag_array 	- Filter the data array for each/any event.
+    +   `add_filter( 'eacDoojigger_google_tag_array', function($params,$event) {...} );`
+    +   `$params` is a data array passed with the event
+    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', or 'ecommerce'.
+
++	eacDoojigger_google_tag_container	- Fired after the initial tag container (GTM or GA) is loaded.
+	+	`add_action('eacDoojigger_google_tag_container', function($type,$config){...},10,2);`
+	+	`$type` is the tag type : 'gtm' or 'gtag'
+	+	`$config` is the configuration array.
+
 = 3rd Party Service =
 
-By loading the Google Tag Manager (GTM) or Google Analytics (GA4) script, {eac}SimpleGTM causes data collected from your website *and from your users* to be transmitted to Google. 
+By loading the Google Tag Manager (GTM) or Google Analytics (GA4) script, {eac}SimpleGTM causes data collected from your website *and from your users* to be transmitted to Google.
 
 +   [How Google Analytics works](https://support.google.com/analytics/answer/12159447?hl=en)
 +   [Introduction to Google Tag Manager](https://support.google.com/tagmanager/answer/6102821?hl=en)
@@ -197,7 +207,7 @@ Once installed and activated options for this extension will show in the 'Tracki
 
 == Copyright ==
 
-= Copyright © 2025, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
+= Copyright © 2026, EarthAsylum Consulting, distributed under the terms of the GNU GPL. =
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -207,6 +217,17 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.0.7 – May 21, 2026 =
+
++   Compatible with WordPress 7.0.
++	Ignore if `wp_print_scripts` or `wp_print_footer_scripts` is fired more than once.
++	Added `eacDoojigger_google_tag_array` filter to filter data array passed with events.
++	Added `item_categories` array with unique lower-cased item category names for woocommerce items.
++	Added `categories` array with all `item_categories`;
++	Use `order->get_order_number()` instead of `order->get_id()` for woo transaction id.
++	Added action `google_tag_container` fired after loading initial container.
+
 
 = Version 1.0.6 – Apr 19, 2025 =
 

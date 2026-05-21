@@ -7,15 +7,15 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger Extensions\{eac}SimpleGTM
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
  *
  * @wordpress-plugin
  * Plugin Name:			{eac}SimpleGTM
  * Description:			{eac}SimpleGTM Adds Google Tag Manager (gtm) or Google Analytics (gtag) to WordPress
- * Version:				1.0.6
+ * Version:				1.0.7
  * Requires at least:	5.8
- * Tested up to:		6.8
- * Requires PHP:		7.4
+ * Tested up to:		7.0
+ * Requires PHP:		8.1
  * Plugin URI:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
