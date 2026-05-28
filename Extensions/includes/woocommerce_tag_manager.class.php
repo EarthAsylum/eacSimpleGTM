@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0417.1
+ * @version		26.0528.1
  */
 
 class woocommerce_tag_manager
@@ -397,17 +397,17 @@ class woocommerce_tag_manager
 			if ($parent && ($attributes = $product->get_attributes())) {
 				$value['item_variant']	= implode(',',(array)$attributes);
 			}
+			$categories = [];
 			if ($terms = get_the_terms( $product->get_id(), 'product_cat' ))
 			{
-				$categories = [];
 				foreach ($terms as $x => $term) {
 					if ($x < 5) {
 						$value[rtrim('item_category'.$x+1,'1')] = $term->name;
 						$categories[] = strtolower($term->name);
 					}
 				}
-				$value['item_categories'] = array_unique($categories);
 			}
+			$value['item_categories'] = array_unique($categories);
 			return $value;
 		}
 		return [];
@@ -425,7 +425,7 @@ class woocommerce_tag_manager
 	{
 		$categories = [];
 		foreach ($items as $item) {
-			$categories = array_merge($categories,$item['item_categories']);
+			$categories = array_merge($categories,$item['item_categories'] ?? []);
 		}
 		return array_unique($categories);
 	}

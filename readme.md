@@ -8,8 +8,8 @@
 
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:         1.0.7  
-Last Updated:       21-May-2026  
+Stable tag:         1.0.8  
+Last Updated:       28-May-2026  
 Requires at least:  5.8  
 Tested up to:       7.0  
 Requires PHP:       8.1  
