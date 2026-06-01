@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0528.1
+ * @version		26.0601.1
  */
 
 class woocommerce_tag_manager
@@ -24,6 +24,16 @@ class woocommerce_tag_manager
 	private $options;
 
 	/**
+	 * @var string currency code
+	 */
+	public $currency = 'USD';
+
+	/**
+	 * @var int number format decimals
+	 */
+	public $decimals = 2;
+
+	/**
 	 * constructor method
 	 *
 	 * @param 	object	$gtm parent extension object
@@ -33,6 +43,9 @@ class woocommerce_tag_manager
 	{
 		$this->gtm 		= $gtm;
 		$this->options 	= $options;
+
+		$this->currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() :'USD';
+		$this->decimals = function_exists('wc_get_price_decimals') ? wc_get_price_decimals() : 2;
 
 		if (in_array('ecommerce',$options))
 		{
@@ -61,15 +74,16 @@ class woocommerce_tag_manager
 	 */
 	public function woo_ecommerce_events($bool,$gtm): bool
 	{
-		$decimals = $this->gtm->decimals;
-		$currency = $this->gtm->currency;
+		$decimals = $this->decimals;
+		$currency = $this->currency;
+		$customer = [];
 
 		// purchase event
 		if ( $order = $this->get_order_received() )
 		{
 			if (in_array('enhanced-conv',$this->options))
 			{
-				$this->add_enhanced_conversion($order);
+				$customer = $this->add_enhanced_conversion($order) ?: [];
 			}
 			$value = round($order->get_subtotal() - $order->get_discount_total(),$decimals);
 			$items = [];
@@ -80,7 +94,7 @@ class woocommerce_tag_manager
 			}
 			$coupons = (array)$order->get_coupon_codes();
 			$discount = $order->get_total_discount();
-			$this->gtm->add_ecommerce_event('purchase',[
+			$this->gtm->add_ecommerce_event('purchase',array_merge([
 				'transaction_id'=> $order->get_order_number(),
 				'currency'		=> $currency,
 				'value'			=> $value,
@@ -90,7 +104,7 @@ class woocommerce_tag_manager
 				'tax'			=> round($order->get_total_tax(),$decimals),
 				'items'			=> $items,
 				'categories'	=> $this->get_all_categories($items),
-			]);
+			],$customer));
 			return true;
 		}
 		// begin_checkout event
@@ -188,7 +202,7 @@ class woocommerce_tag_manager
 		// Enhanced Conversion
 		if ( $order = $this->get_order_received() )
 		{
-			return $this->add_enhanced_conversion($order);
+			return ($this->add_enhanced_conversion($order)) ? true : false;
 		}
 		return $bool;
 	}
@@ -219,11 +233,13 @@ class woocommerce_tag_manager
 	 *
 	 * @param object $order wc_order
 	 */
-	private function add_enhanced_conversion($order): bool
+	private function add_enhanced_conversion($order): array
 	{
 		static $PH	= '/^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/';
 
-		if (function_exists('wp_has_consent') && ! wp_has_consent('statistics')) return false;
+		if (function_exists('wp_has_consent')) {
+			if (! (wp_has_consent('statistics') && wp_has_consent('marketing'))) return [];
+		}
 
 		$billing_phone = (preg_match($PH,$order->get_billing_phone(),$match))
 			? '+1'.$match[1].$match[2].$match[3]
@@ -249,7 +265,7 @@ class woocommerce_tag_manager
 			$this->gtm->add_google_data('user_data',$customer);
 		}
 
-		return true;
+		return $customer;
 	}
 
 
@@ -270,10 +286,10 @@ class woocommerce_tag_manager
 		if ( $product = wc_get_product($id) )
 		{
 			$item 		= $product->get_slug();
-			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$value 		= round($product->get_price(),$this->decimals);
 			$items		= [ $this->get_item($id,$quantity) ];
 			$this->gtm->add_ecommerce_event('add_to_cart',array_merge([
-				'currency'		=> $this->gtm->currency,
+				'currency'		=> $this->currency,
 				'value'			=> $value,
 				'items' 		=> $items,
 				'categories'	=> $this->get_all_categories($items),
@@ -295,10 +311,10 @@ class woocommerce_tag_manager
 		{
 			$item 		= $product->get_slug();
 			$quantity 	= $wcCart->cart_contents[ $cart_item_key ][ 'quantity' ];
-			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$value 		= round($product->get_price(),$this->decimals);
 			$items		= [ $this->get_item($product,$quantity) ];
 			$this->gtm->add_ecommerce_event('remove_from_cart',array_merge([
-				'currency'		=> $this->gtm->currency,
+				'currency'		=> $this->currency,
 				'value'			=> $value,
 				'items' 		=> $items,
 				'categories'	=> $this->get_all_categories($items),
@@ -319,11 +335,11 @@ class woocommerce_tag_manager
 		if ($product = $wcCart->cart_contents[ $cart_item_key ][ 'data' ])
 		{
 			$item 		= $product->get_slug();
-			$value 		= round($product->get_price(),$this->gtm->decimals);
+			$value 		= round($product->get_price(),$this->decimals);
 			$items		= [ $this->get_item($product,$quantity) ];
 			$this->gtm->add_ecommerce_event('update_cart_item',array_merge([
-				'currency'	=> $this->gtm->currency,
-				'value'		=> $value,
+				'currency'		=> $this->currency,
+				'value'			=> $value,
 				'items' 		=> $items,
 				'categories'	=> $this->get_all_categories($items),
 			],$this->gtm->page_attributes()),true);
@@ -345,23 +361,23 @@ class woocommerce_tag_manager
 			if ($coupon->get_discount_type() == 'percent') {
 				$value = round($coupon->get_amount()/100,2);
 			} else {
-				$value = round($coupon->get_amount(),$this->gtm->decimals);
+				$value = round($coupon->get_amount(),$this->decimals);
 			}
 			if ($wcCart = WC()->cart) {
 				if ($amount = $wcCart->get_coupon_discount_amount( $coupon_code )) {
-					$value = round($amount,$this->gtm->decimals);
+					$value = round($amount,$this->decimals);
 				} else {
 					$discount = new \WC_Discounts( $wcCart );
 					if (!is_wp_error($discount->apply_coupon($coupon,true))) {
 						$discounts = $discount->get_discounts_by_coupon();
 						if ($amount = $discounts[$coupon_code]) {
-							$value = round($amount,$this->gtm->decimals);
+							$value = round($amount,$this->decimals);
 						}
 					}
 				}
 			}
 			$this->gtm->add_ecommerce_event('select_promotion',array_merge([
-				'currency'		=> $this->gtm->currency,
+				'currency'		=> $this->currency,
 				'value'			=> $value,
 				'promotion_id'	=> $coupon_code,
 				'promotion_name'=> $coupon->get_description()
@@ -390,8 +406,8 @@ class woocommerce_tag_manager
 			$value = [
 				'item_id' 		=> $product->get_sku(),
 				'item_name'		=> $name,//sanitize_title($product->get_name()),
-				'price' 		=> round($product->get_price(), $this->gtm->decimals),
-				'discount' 		=> max(0,round((float)$product->get_regular_price() - (float)$product->get_price(), $this->gtm->decimals)),
+				'price' 		=> round($product->get_price(), $this->decimals),
+				'discount' 		=> max(0,round((float)$product->get_regular_price() - (float)$product->get_price(), $this->decimals)),
 				'quantity' 		=> $quantity,
 			];
 			if ($parent && ($attributes = $product->get_attributes())) {

@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0421.1';
+		const VERSION	= '26.0531.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -26,7 +26,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 * By loading the Google Tag Manager (GTM) or Google Analytics (GA4) script,
 		 * {eac}SimpleGTM causes data collected from your website *and from your users* to be transmitted to Google.
 		 */
-		const SCRIPT_URL = "https://www.googletagmanager.com/%s.js?id=%s";
+		const SCRIPT_URL = "https://www.googletagmanager.com";
 
 		/**
 		 * @var array consent attributes
@@ -66,16 +66,6 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 */
 		private $event_options = false;
 
-		/**
-		 * @var string currency code
-		 */
-		public $currency = 'USD';
-
-		/**
-		 * @var int number format decimals
-		 */
-		public $decimals = 2;
-
 
 		/**
 		 * constructor method
@@ -106,6 +96,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 				 */
 				$this->add_action('google_tag_event', 		array($this,'add_google_event'),10,3);
 				$this->add_action('google_tag_data', 		array($this,'add_google_data'),10,2);
+				$this->add_action('google_tag_object', 		array($this,'push_google_array'),10,1);
 				$this->add_action('google_ecommerce_event', array($this,'add_ecommerce_event'),10,3);
 			}
 
@@ -145,20 +136,21 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 
 			if ($this->is_admin()) return;
 
+			// using gtm or ga4
+			$tag_id 	= $this->get_option('gtag_container_id');
+			$this->tag_type = (!empty($tag_id) && substr($tag_id,0,3) == 'GTM') ? 'gtm' : 'gtag';
+
 			// maybe load un-fired events
 			$this->ga_events = $this->plugin->getVariable($this->transientId,[]);
 
-			$this->currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() :'USD';
-			$this->decimals = function_exists('wc_get_price_decimals') ? wc_get_price_decimals() : 2;
-
 			$this->event_options = (array)$this->get_option('gtag_events',[]);
 
-			\add_action('wp_print_scripts', 				array($this,'output_tag_manager')); // do this early
-			\add_action('wp_print_footer_scripts', 			array($this,'output_tag_events'));	// do this later
+			\add_action('wp_print_scripts', 				array($this,'output_tag_manager'),10);  // do this early
+			\add_action('wp_print_footer_scripts', 			array($this,'output_tag_events'), 50);	// do this later
 
 			/* E-Commerce */
 			if ($this->use_ecommerce == 'woocommerce') {
-				require 'includes/woocommerce_tag_manager.class.php';
+				require 'ecommerce/woocommerce_tag_manager.class.php';
 				new woocommerce_tag_manager($this,$this->event_options);
 			}
 
@@ -167,7 +159,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			{
 				\add_action('set_404', function($wp_query)
 					{
-						$this->add_google_event('page_not_found',['request_uri'=>$this->varServer('REQUEST_URI')]);
+						$this->add_google_event('page_not_found');
 					},10,2
 				);
 			}
@@ -194,21 +186,6 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
     		if ($once++) return;
 
 			$tag_id 	= $this->get_option('gtag_container_id');
-			$this->tag_type = (!empty($tag_id) && substr($tag_id,0,3) == 'GTM') ? 'gtm' : 'gtag';
-
-			// if we have a complete id, load the script
-			if (!empty($tag_id) && preg_match("/\w{1,3}-\w{5,12}/",$tag_id))
-			{
-				// GTM/GA must load in the document head but may load asynchronously
-				// register/enqueue force load in footer
-				$handle = 'google-tag-manager';
-				$src 	= sprintf(self::SCRIPT_URL, $this->tag_type, $tag_id);
-				$src 	= apply_filters( 'script_loader_src', $src, $handle );
-				$tag 	= sprintf("<script async id='%s' type='text/javascript' src='%s'></script>\n",
-							$handle, esc_url($src)
-						);
-				echo apply_filters( 'script_loader_tag', $tag, $handle, $src );
-			}
 
 			// set dataLayer & gtag function
 			$script_safe = 	"window.dataLayer = window.dataLayer || [];\n".
@@ -230,9 +207,9 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			$consent 	= $this->apply_filters('google_tag_consent',$consent);
 
 			// add default consent
-			if (!empty($consent)) {
-				$script_safe .=	"gtag('consent', 'default', ".wp_json_encode($consent).");\n";
-			}
+			$consent 	= (!empty($consent))
+				? "gtag('consent', 'default', ".wp_json_encode($consent).");\n"
+				: '';
 
 			// set runtime configuration
 			$config = [
@@ -248,19 +225,42 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			$config 	= $this->apply_filters('google_tag_configuration',$config);
 			$config 	= array_filter($config, function($v) {return !is_null($v);});
 
-			// configure/initialize
+			// configure/initialize with or without a complete tag id
 			if (!empty($tag_id))
 			{
 				if ($this->tag_type == 'gtm') {
-					$script_safe .= "gtag('gtm.start', new Date().getTime());\n".
-									"gtag('event', 'gtm.js',".wp_json_encode($config).")\n";
+					$script_safe .= "gtag('set',{'gtm.start': new Date().getTime()});\n".
+									$consent.
+									"gtag('event', 'gtm.js', ".wp_json_encode($config).");\n";
 				} else {
 					$script_safe .= "gtag('js', new Date());\n".
-  									"gtag('config', '".esc_attr($tag_id)."',".wp_json_encode($config).")\n";
+  									"gtag('config', '".esc_attr($tag_id)."',".wp_json_encode($config).")\n".
+  									$consent;
 				}
 			}
 
-			echo wp_get_inline_script_tag(trim($script_safe),['id'=>'google-tag-manager-inline']);
+			$handle 	= 'google-tag-manager';
+			echo wp_get_inline_script_tag(trim($script_safe),[
+					'id'	=> $handle.'-inline'
+			]);
+
+			// if we have a complete tag id, load the script
+			if (!empty($tag_id) && preg_match("/\w{1,3}-\w{5,12}/",$tag_id))
+			{
+				// GTM/GA must load in the document head but may load asynchronously
+				// register/enqueue force load in footer
+				$script_url = $this->get_option('gtag_measurement_path') ?: self::SCRIPT_URL;
+				$script_url = rtrim($script_url,'/') . "/%s.js?id=%s";
+
+				$src 	= sprintf($script_url, $this->tag_type, $tag_id);
+				$src 	= apply_filters( 'script_loader_src', $src, $handle );
+				$tag 	= wp_get_script_tag([
+					'src' 	=> esc_url($src),
+					'id'	=> $handle,
+					'async'	=> true,
+				]);
+				echo apply_filters( 'script_loader_tag', $tag, $handle, $src );
+			}
 
 			$this->do_action('google_tag_container',$this->tag_type,$config);
 		}
@@ -302,24 +302,25 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 				foreach ($events as $values)
 				{
 					switch ($type) {
+						case 'push':
+							$tags_escaped .= "gtag('set', ".wp_json_encode($values).");\n";
+							break;
+
+						case 'data':	// user_data -> userData
+							$event = lcfirst(str_replace(['_','-'],'',ucwords($event,'_-')));
 						case 'set':
 							$tags_escaped .= "gtag('set', '".esc_attr($event)."', ".wp_json_encode($values).");\n";
 							break;
-						case 'data':	// user_data -> userData
-							$event = lcfirst(str_replace(['_','-'],'',ucwords($event,'_-')));
-							$values = [esc_attr($event) => $values];
-							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
-							break;
+
 						case 'ecommerce':
 							$values = ['event' => esc_attr($event), $type => $values];
 							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
 							break;
+
 						case 'gtm':
-							$values = array_merge(['event' => esc_attr($event)], $values);
-							$tags_escaped .= "dataLayer.push(".wp_json_encode($values).");\n";
-							break;
 						case 'gtag':
 						default:
+							if (array_key_exists('eventModel',$values)) $values = $values['eventModel'];
 							$tags_escaped .= "gtag('event', '".esc_attr($event)."', ".wp_json_encode($values).");\n";
 					}
 				}
@@ -347,10 +348,11 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 * @param array $params event attributes
 		 * @param bool $allowMultiple allow multiple events of the same name
 		 */
-    	public function add_google_event(string $event, array $params = [], $allowMultiple = false): void
+    	public function add_google_event(string $event, array|object $params = [], $allowMultiple = false): void
     	{
     		$type = $this->tag_type;
-			$this->_push_event_array([$type,$event], $params, $allowMultiple);
+    		$params['request_uri'] = $this->plugin->varServer('REQUEST_URI');
+			$this->_push_event_array([$type,$event], (array)$params, $allowMultiple);
 		}
 
 
@@ -361,10 +363,22 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 * @param array $params event attributes
 		 * @param bool $allowMultiple allow multiple events of the same name
 		 */
-    	public function add_ecommerce_event(string $event, array $params = [], $allowMultiple = false): void
+    	public function add_ecommerce_event(string $event, array|object $params = [], $allowMultiple = false): void
     	{
     		$type = ($this->tag_type == 'gtm') ? 'ecommerce' : $this->tag_type;
-			$this->_push_event_array([$type,$event], $params, $allowMultiple);
+    		$params['request_uri'] = $this->plugin->varServer('REQUEST_URI');
+			$this->_push_event_array([$type,$event], (array)$params, $allowMultiple);
+		}
+
+
+		/**
+		 * Push GA data object
+		 *
+		 * @param array $params event attributes
+		 */
+    	public function push_google_array(array|object $params): void
+    	{
+			$this->_push_event_array(['push','object'], (array)$params, true);
 		}
 
 
@@ -374,10 +388,10 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		 * @param string $name data name
 		 * @param array $params event attributes
 		 */
-    	public function add_google_data(string $name, array $params = []): void
+    	public function add_google_data(string $name, array|object $params = []): void
     	{
     		$type = ($this->tag_type == 'gtm') ? 'data' : 'set';
-			$this->_push_event_array([$type,$name], $params, false);
+			$this->_push_event_array([$type,$name], (array)$params, false);
 		}
 
 

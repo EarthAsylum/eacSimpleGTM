@@ -5,8 +5,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0909.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0531.1
  *
  * included for admin_options_settings() method
  */
@@ -26,9 +26,6 @@ if ( $this->use_ecommerce ) {
 }
 $events['Page Not Found (404) Errors'] = 'track-404';
 
-$this->delete_option('gtag_url_passthru');
-$this->delete_option('gtag_load_on');
-
 /* register this extension with group name on default tab, and settings fields */
 $this->registerExtensionOptions( $this->className,
 	[
@@ -47,6 +44,13 @@ $this->registerExtensionOptions( $this->className,
 							return false;
 						},
 		),
+		'gtag_measurement_path'		=> 	array(
+				'type'			=> 	'text',
+				'label'			=> 	'Gateway Path',
+				'info'			=> 	'When using Google Tag Gateway, enter the Measurement Path - the path on your website reserved for Google Tag Gateway.',
+				'help'			=> 	"[info]<br/><a href='https://developers.google.com/tag-platform/tag-manager/gateway' target='_blank'>What is Google tag gateway for advertisers?</a>",
+				'attributes'	=> 	['placeholder'=>'/xxxx'],
+		),
 		'gtag_consent'			=> 	array(
 				'type'			=> 	'checkbox',
 				'label'			=> 	'Consent Default',
@@ -60,7 +64,6 @@ $this->registerExtensionOptions( $this->className,
 									"This is typically not necessary and not recommended when using a CMP.",
 				'help'			=> "[info] When the Google Tag Manager first loads, ".
 									"the selected attributes are set to 'granted' before other tags are loaded or actions taken.",
-			//	'style'			=> 	'display:inline-block;width:15em;',
 				'style'			=> 	'display:block;',
 				'advanced'		=>	true,
 		),

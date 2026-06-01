@@ -8,8 +8,8 @@
 
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:         1.0.8  
-Last Updated:       28-May-2026  
+Stable tag:         1.1.0  
+Last Updated:       01-Jun-2026  
 Requires at least:  5.8  
 Tested up to:       7.0  
 Requires PHP:       8.1  
@@ -30,7 +30,13 @@ GitHub URI:         https://github.com/EarthAsylum/eacsimplegtm
 
 **{eac}Doojigger SimpleGTM** is an [{eac}Doojigger](https://eacDoojigger.earthasylum.com/) extension that installs the Google Tag Manager (GTM) or Google Analytics (GA4) script, sets default consent options, and enables tracking of page views, site searches, content views, and, when using [WooCommerce](https://woocommerce.com/), e-commerce actions.
 
-_{eac}SimpleGTM_ is a very light-weight and simple extension that uses PHP to add small JavaScript snippets to your web pages for configuring and tracking with Google Analytics. Many web site owners will find this more than sufficient over more complicated (and over-bearing) alternatives.
+_{eac}SimpleGTM_ is a very light-weight and simple extension that uses PHP to add small JavaScript snippets to your web pages for configuring and tracking with Google Tag Manager or Google Analytics. Many web site owners will find this more than sufficient over more complicated (and over-bearing) alternatives.
+
+#### Google Tage Manager Workspace Import
+
+Included with this plugin (in the [gtm_workspace](https://github.com/EarthAsylum/eacsimplegtm/gtm_workspace/) folder) is `eacSimpleGTM_workspace.json` and the associated `readme.md` file. `eacSimpleGTM_workspace.json` may be imported to your Google Tag Manager workspace to create the tags, triggers, and variables needed for all {eac}SimpleGTM events passed to Google Analytics.
+
+Review the [gtm_workspace/readme.md](https://github.com/EarthAsylum/eacsimplegtm/gtm_workspace/readme.md) file for details.
 
 #### Default Consent (advanced)
 
@@ -114,9 +120,11 @@ See Recommended events:
 >   \* Page Views are typically included in your tag container, other tags & triggers may need to be configured in
 [Google Tag Manager](https://tagmanager.google.com/).
 
->   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events (when 'statistics-anonymous' consent is denied) and Enhanced Conversions (when 'statistics' consent is denied).
+>   \* If enabled, [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) may block events (when 'statistics-anonymous' consent is denied) and Enhanced Conversions (when 'statistics' and/or 'marketing' consent is denied).
 
 #### Actions and Filters
+
+__Actions__
 
 +   eacDoojigger_google_tag_event 	- Action to add a custom event.
     +   `do_action( 'eacDoojigger_google_tag_event( 'event_name', [...event parameters...] ) );`
@@ -124,8 +132,13 @@ See Recommended events:
 +   eacDoojigger_google_tag_data    - Action to add data to the Google tag data layer.
     +   `do_action( 'eacDoojigger_google_tag_data( 'data_name', [...data array...] ) );`
 
++   eacDoojigger_google_tag_object  - Action to add data to the Google tag data layer.
+    +   `do_action( 'eacDoojigger_google_tag_object( [...data array...] ) );`
+
 +   eacDoojigger_google_ecommerce_event - Action to add an ecommerce event.
     +   `do_action( 'eacDoojigger_google_ecommerce_event( 'event_name', [...event parameters...] ) );`
+
+__Filters__
 
 +   eacDoojigger_google_tag_consent - Filter the consent array.
     +   `add_filter( 'eacDoojigger_google_tag_consent', function($consent) {...} );`
@@ -138,14 +151,14 @@ See Recommended events:
 +   eacDoojigger_google_tag_events 	- Filter the events array prior to output.
     +   `add_filter( 'eacDoojigger_google_tag_events', function($events) {...} );`
     +   `$events` is an array of `[ $event => [$attributes] ]`
-    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', or 'ecommerce'.
+    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', 'ecommerce', or 'push'.
 
 +   eacDoojigger_google_tag_array 	- Filter the data array for each/any event.
     +   `add_filter( 'eacDoojigger_google_tag_array', function($params,$event) {...} );`
     +   `$params` is a data array passed with the event
-    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', or 'ecommerce'.
+    +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', 'ecommerce', or 'push'.
 
-+	eacDoojigger_google_tag_container	- Fired after the initial tag container (GTM or GA) is loaded.
++	eacDoojigger_google_tag_container	- Fired after the initial tag container (GTM or GA) is output to the page.
 	+	`add_action('eacDoojigger_google_tag_container', function($type,$config){...},10,2);`
 	+	`$type` is the tag type : 'gtm' or 'gtag'
 	+	`$config` is the configuration array.
