@@ -34,9 +34,9 @@ _{eac}SimpleGTM_ is a very light-weight and simple extension that uses PHP to ad
 
 #### Google Tage Manager Workspace Import
 
-Included with this plugin (in the [gtm_workspace](https://github.com/EarthAsylum/eacsimplegtm/gtm_workspace/) folder) is `eacSimpleGTM_workspace.json` and the associated `readme.md` file. `eacSimpleGTM_workspace.json` may be imported to your Google Tag Manager workspace to create the tags, triggers, and variables needed for all {eac}SimpleGTM events passed to Google Analytics.
+Included with this plugin (in the [gtm_workspace](https://github.com/EarthAsylum/eacSimpleGTM/tree/main/gtm_workspace) folder) is `eacSimpleGTM_workspace.json` and the associated `readme.md` file. `eacSimpleGTM_workspace.json` may be imported to your Google Tag Manager workspace to create the tags, triggers, and variables needed for all {eac}SimpleGTM events passed to Google Analytics.
 
-Review the [gtm_workspace/readme.md](https://github.com/EarthAsylum/eacsimplegtm/gtm_workspace/readme.md) file for details.
+Review the [gtm_workspace/readme.md](https://github.com/EarthAsylum/eacSimpleGTM/blob/main/gtm_workspace/readme.md) file for details.
 
 #### Default Consent (advanced)
 
