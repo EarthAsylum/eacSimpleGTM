@@ -1,7 +1,7 @@
 === {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.1.0
+Stable tag:         1.1.0.1
 Last Updated:       01-Jun-2026
 Requires at least:  5.8
 Tested up to:       7.0
@@ -230,6 +230,10 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.1.0.1 – June 1, 2026 =
+
++	Fix Enhanced Conversions data (user_data) on purchase event.
 
 = Version 1.1.0 – June 1, 2026 =
 

@@ -76,14 +76,16 @@ class woocommerce_tag_manager
 	{
 		$decimals = $this->decimals;
 		$currency = $this->currency;
-		$customer = [];
 
 		// purchase event
 		if ( $order = $this->get_order_received() )
 		{
+			$user_data = [];
 			if (in_array('enhanced-conv',$this->options))
 			{
-				$customer = $this->add_enhanced_conversion($order) ?: [];
+				if ($user_data = $this->add_enhanced_conversion($order)) {
+					$user_data = ['user_data' => $user_data];
+				}
 			}
 			$value = round($order->get_subtotal() - $order->get_discount_total(),$decimals);
 			$items = [];
@@ -104,7 +106,7 @@ class woocommerce_tag_manager
 				'tax'			=> round($order->get_total_tax(),$decimals),
 				'items'			=> $items,
 				'categories'	=> $this->get_all_categories($items),
-			],$customer));
+			],$user_data));
 			return true;
 		}
 		// begin_checkout event
