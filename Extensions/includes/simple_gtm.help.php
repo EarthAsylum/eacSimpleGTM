@@ -5,8 +5,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0726.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0603.1
  *
  * included for admin_options_help() method
  */
@@ -37,7 +37,8 @@ ob_start();
 	<a href='https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm' target='_blank'>recommended names and attributes</a>.
 	Page Views are typically included in your tag container,
 	other tags &amp; triggers may need to be configured in
-	<a href='https://tagmanager.google.com/' target='_blank'>Google Tag Manager.</a></p>
+	<a href='https://tagmanager.google.com/' target='_blank'>Google Tag Manager.</a>
+	See: <a href='https://github.com/EarthAsylum/eacSimpleGTM/tree/main/gtm_workspace' target='_blank'>GTM Workspace Import</a>.</p>
 	</details>
 <?php
 $content = ob_get_clean();

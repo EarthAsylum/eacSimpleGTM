@@ -8,8 +8,8 @@
 
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:         1.1.0.1  
-Last Updated:       01-Jun-2026  
+Stable tag:         1.1.1  
+Last Updated:       07-Jun-2026  
 Requires at least:  5.8  
 Tested up to:       7.0  
 Requires PHP:       8.1  
@@ -102,15 +102,21 @@ See Recommended events:
     +   `purchase {transaction_id, currency, value, coupon, discount, shipping, tax, items}`
     +   *items = {item_id, item_name, price, discount, quantity, item_variant, item_category}*
 
++	Default shipping/payment events
+    +   `add_shipping_info {currency, value, shipping_tier, items}`
+    +   `add_payment_info {currency, value, payment_type, items}`
+    +   *items = {item_id, item_name, price, discount, quantity, item_variant, item_category}*
+    +	*These events are considered a default and may be disabled and overridden with payment-processor specific coding. Here, these events are fired before the `purchase` event and include the assigned shipping and order sub-total.*
+
++   Enhanced Conversions
+    + [Enhanced Conversions for web](https://support.google.com/google-ads/answer/13258081) is a feature that can improve the accuracy of your conversion measurement. It supplements your existing conversion tags by sending hashed first-party conversion data from your website in a privacy safe way. *When enabled, a "user_info" object is added to the dataLayer and the same data is added to the `purchase` event.*
+
 +   Cart Actions
     +   `select_promotion {promotion_id, promotion_name}`
     +   `add_to_cart {currency, value, items}`
     +   `remove_from_cart {currency, value, items}`
     +   `update_cart_item {currency, value, items}`
     +   *items = {item_id, item_name, price, discount, quantity, item_variant, item_category}*
-
-+   Enhanced Conversions
-    + [Enhanced Conversions for web](https://support.google.com/google-ads/answer/13258081) is a feature that can improve the accuracy of your conversion measurement. It supplements your existing conversion tags by sending hashed first-party conversion data from your website in a privacy safe way.
 
 +   Page Not Found
     +   `page_not_found {request_uri}`
@@ -133,10 +139,15 @@ __Actions__
     +   `do_action( 'eacDoojigger_google_tag_data( 'data_name', [...data array...] ) );`
 
 +   eacDoojigger_google_tag_object  - Action to add data to the Google tag data layer.
-    +   `do_action( 'eacDoojigger_google_tag_object( [...data array...] ) );`
+    +   `do_action( 'eacDoojigger_google_tag_object( [...key=>value array...] ) );`
 
 +   eacDoojigger_google_ecommerce_event - Action to add an ecommerce event.
     +   `do_action( 'eacDoojigger_google_ecommerce_event( 'event_name', [...event parameters...] ) );`
+
++	eacDoojigger_google_tag_container	- Fired after the initial tag container (GTM or GA) is output to the page.
+	+	`add_action('eacDoojigger_google_tag_container', function($type,$config){...},10,2);`
+	+	`$type` is the tag type : 'gtm' or 'gtag'
+	+	`$config` is the configuration array.
 
 __Filters__
 
@@ -157,11 +168,6 @@ __Filters__
     +   `add_filter( 'eacDoojigger_google_tag_array', function($params,$event) {...} );`
     +   `$params` is a data array passed with the event
     +   `$event` is an array `[type,event_name]` where type is 'set', 'data', 'gtm', 'gtag', 'ecommerce', or 'push'.
-
-+	eacDoojigger_google_tag_container	- Fired after the initial tag container (GTM or GA) is output to the page.
-	+	`add_action('eacDoojigger_google_tag_container', function($type,$config){...},10,2);`
-	+	`$type` is the tag type : 'gtm' or 'gtag'
-	+	`$config` is the configuration array.
 
 #### 3rd Party Service
 

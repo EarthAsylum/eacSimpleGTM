@@ -444,8 +444,8 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			/* E-Commerce */
 			if ( in_array('ecommerce',$this->event_options)
 			||   in_array('enhanced-conv',$this->event_options)
-			||   in_array('cart-actions',$this->event_options) )
-			{
+			||   in_array('cart-actions',$this->event_options)
+			) {
 				/**
 				 * filter {pluginname}__add_ecommerce_event
 				 * @internal

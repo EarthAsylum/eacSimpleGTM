@@ -6,7 +6,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0531.1
+ * @version		26.0603.1
  *
  * included for admin_options_settings() method
  */
@@ -21,8 +21,9 @@ $events = [
 ];
 if ( $this->use_ecommerce ) {
 	$events['E-Commerce Pages (product, cart, checkout, purchase)'] = 'ecommerce';
+	$events['⤷ Include default shipping/payment events on purchase']  = 'payship-events';
+	$events['⤷ Enhanced Conversions (customer data)'] 				= 'enhanced-conv';
 	$events['Cart Actions (add, remove, update, coupon)'] 			= 'cart-actions';
-	$events['Enhanced Conversions (customer data)'] 				= 'enhanced-conv';
 }
 $events['Page Not Found (404) Errors'] = 'track-404';
 
@@ -104,16 +105,17 @@ $this->registerExtensionOptions( $this->className,
 				'label'			=> 	'Events To Track',
 				'options'		=>	$events,
 				'default'		=>	['site-search','view-content','view-archive'],
-				'info'			=> 	"Select optional events to be sent to Google Analytics ".
+				'info'			=> 	"Select optional events to be sent to Tag Manager or Analytics ".
 									"(page views are typically included in your tag container and may not be needed).",
 				'help'			=>	"[info] ".
 									"View Content includes categories, terms, and tags. ".
 									"View Archive includes archives, authors, and dates. ".
 									(($this->use_ecommerce)
-										? "E-Commerce Pages include product, cart, checkout, and purchase. ".
-											"Cart Actions include add, remove, update and coupon. ".
+										? "E-Commerce Pages include shop, product, cart, checkout, and purchase. ".
+											"Shipping and payment info events default to the order confirmation values. ".
 											"<a href='https://support.google.com/google-ads/answer/13258081' target='_blank'>Enhanced Conversions</a> ".
-											"supplements your conversion tag by sending hashed customer data to Google."
+												"supplements your conversion tag by sending hashed customer info in the dataLayer and in the purchase event. ".
+											"Cart Actions include add, remove, update and coupon. "
 										: ""
 									),
 				'style'			=> 	'display:block;',

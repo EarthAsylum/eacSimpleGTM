@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0601.1
+ * @version		26.0605.1
  */
 
 class woocommerce_tag_manager
@@ -95,13 +95,32 @@ class woocommerce_tag_manager
 				$items[] = $this->get_item($product,$item->get_quantity());
 			}
 			$coupons = (array)$order->get_coupon_codes();
-			$discount = $order->get_total_discount();
+			if (in_array('payship-events',$this->options))
+			{
+				if ($shipping = $order->get_shipping_method()) {
+					$this->gtm->add_ecommerce_event('add_shipping_info',[
+						'currency'		=> $currency,
+						'value'			=> round($order->get_shipping_total(),$decimals),
+						'shipping_tier'	=> html_entity_decode($shipping),
+						'items'			=> $items,
+					]);
+				}
+				if ($payment = $order->get_payment_method_title()) {
+					$this->gtm->add_ecommerce_event('add_payment_info',[
+						'currency'		=> $currency,
+						// _atp_order_first_subtotal = non-standard alternate for payment plans
+						'value'			=> round($order->get_meta('_atp_order_first_subtotal') ?: $order->get_subtotal(),$decimals),
+						'payment_type'	=> html_entity_decode($payment),
+						'items'			=> $items,
+					]);
+				}
+			}
 			$this->gtm->add_ecommerce_event('purchase',array_merge([
 				'transaction_id'=> $order->get_order_number(),
 				'currency'		=> $currency,
 				'value'			=> $value,
 				'coupon'		=> implode('/',$coupons),
-				'discount'		=> round($discount,$decimals),
+				'discount'		=> round($order->get_total_discount(),$decimals),
 				'shipping'		=> round($order->get_shipping_total(),$decimals),
 				'tax'			=> round($order->get_total_tax(),$decimals),
 				'items'			=> $items,
@@ -126,7 +145,7 @@ class woocommerce_tag_manager
 				'currency'		=> $currency,
 				'value'			=> $value,
 				'coupon'		=> implode('/',$coupons),
-				'discount'		=> round($discount,$decimals),
+				'discount'		=> round($wcCart->get_cart_discount_total(),$decimals),
 				'items'			=> $items,
 				'categories'	=> $this->get_all_categories($items),
 			]);
@@ -400,6 +419,12 @@ class woocommerce_tag_manager
 	{
 		if ( $product = wc_get_product($product) )
 		{
+			$price = (method_exists($product,'get_variation_price'))
+				?	$product->get_variation_price()
+				:	$product->get_price();
+			$regprice = (method_exists($product,'get_variation_regular_price'))
+				?	$product->get_variation_regular_price()
+				:	$product->get_regular_price();
 			if ($parent = $product->get_parent_id()) {
 				$name = wc_get_product($parent)->get_name();
 			} else {
@@ -408,15 +433,15 @@ class woocommerce_tag_manager
 			$value = [
 				'item_id' 		=> $product->get_sku(),
 				'item_name'		=> $name,//sanitize_title($product->get_name()),
-				'price' 		=> round($product->get_price(), $this->decimals),
-				'discount' 		=> max(0,round((float)$product->get_regular_price() - (float)$product->get_price(), $this->decimals)),
+				'price' 		=> round( floatval($price), $this->decimals ),
+				'discount' 		=> max(0,round((float)$regprice - (float)$product->get_price(), $this->decimals)),
 				'quantity' 		=> $quantity,
 			];
 			if ($parent && ($attributes = $product->get_attributes())) {
 				$value['item_variant']	= implode(',',(array)$attributes);
 			}
 			$categories = [];
-			if ($terms = get_the_terms( $product->get_id(), 'product_cat' ))
+			if ($terms = get_the_terms( $parent ?: $product->get_id(), 'product_cat' ))
 			{
 				foreach ($terms as $x => $term) {
 					if ($x < 5) {
@@ -425,7 +450,7 @@ class woocommerce_tag_manager
 					}
 				}
 			}
-			$value['item_categories'] = array_unique($categories);
+			$value['item_categories'] = array_values(array_unique($categories));
 			return $value;
 		}
 		return [];
@@ -445,7 +470,7 @@ class woocommerce_tag_manager
 		foreach ($items as $item) {
 			$categories = array_merge($categories,$item['item_categories'] ?? []);
 		}
-		return array_unique($categories);
+		return array_values(array_unique($categories));
 	}
 
 
