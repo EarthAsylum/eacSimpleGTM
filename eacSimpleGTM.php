@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @wordpress-plugin
  * Plugin Name:			{eac}SimpleGTM
  * Description:			{eac}SimpleGTM Adds Google Tag Manager (gtm) or Google Analytics (gtag) to WordPress
- * Version:				1.1.1
+ * Version:				1.1.2
  * Requires at least:	5.8
  * Tested up to:		7.0
  * Requires PHP:		8.1

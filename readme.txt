@@ -1,8 +1,8 @@
 === {eac}Doojigger Simple GTM Extension for WordPress ===
 Plugin URI:         https://eacdoojigger.earthasylum.com/eacsimplegtm/
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         1.1.1
-Last Updated:       07-Jun-2026
+Stable tag:         1.1.2
+Last Updated:       06-Aug-2026
 Requires at least:  5.8
 Tested up to:       7.0
 Requires PHP:       8.1
@@ -236,6 +236,11 @@ You should receive a copy of the GNU General Public License along with this prog
 
 
 == Changelog ==
+
+= Version 1.1.2 – August 6, 2026 =
+
++	Supports WP Consent API using {eac}Doojigger `has_cookie_consent()`.
++	Option to enable/disable consent required before loading (consent to load).
 
 = Version 1.1.1 – June 7, 2026 =
 

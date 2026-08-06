@@ -6,7 +6,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0603.1
+ * @version		26.0804.1
  *
  * included for admin_options_settings() method
  */
@@ -51,6 +51,14 @@ $this->registerExtensionOptions( $this->className,
 				'info'			=> 	'When using Google Tag Gateway, enter the Measurement Path - the path on your website reserved for Google Tag Gateway.',
 				'help'			=> 	"[info]<br/><a href='https://developers.google.com/tag-platform/tag-manager/gateway' target='_blank'>What is Google tag gateway for advertisers?</a>",
 				'attributes'	=> 	['placeholder'=>'/xxxx'],
+		),
+		'gtag_consent_load'			=> 	array(
+				'type'			=> 	'switch',
+				'label'			=> 	'Consent To Load',
+				'options' 		=> 	['Enabled'],
+		//		'default'		=>	'Enabled',
+				'info'			=>	"Require user consent before loading the GTM or GA script.",
+				'help'			=> "[info] When enabled, the visitor must provide consent via a Consent Management Platform (CMP) before the Google tag can be loaded.",
 		),
 		'gtag_consent'			=> 	array(
 				'type'			=> 	'checkbox',

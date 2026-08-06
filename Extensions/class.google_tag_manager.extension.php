@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0531.1';
+		const VERSION	= '26.0804.1';
 
 		/**
 		 * @var string gtm/ga4 script url
@@ -185,6 +185,11 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
     		static $once = 0;
     		if ($once++) return;
 
+			// wp consent api says no consent
+			if ($this->is_option('gtag_consent_load')) {
+				if (! $this->plugin->has_cookie_consent('statistics-anonymous')) return;
+			}
+
 			$tag_id 	= $this->get_option('gtag_container_id');
 
 			// set dataLayer & gtag function
@@ -281,7 +286,7 @@ if (! class_exists(__NAMESPACE__.'\google_tag_manager', false) )
 			or  $this->varServer("HTTP_PURPOSE") == 'prefetch') return;
 
 			// wp consent api says no consent
-			if (function_exists('wp_has_consent') && ! wp_has_consent('statistics-anonymous')) return;
+			if (! $this->plugin->has_cookie_consent('statistics-anonymous')) return;
 
 			if (!empty($this->event_options))
 			{
